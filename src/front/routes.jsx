@@ -1,30 +1,52 @@
-// Import necessary components and functions from react-router-dom.
+import React from "react";
+import { Route, Routes } from "react-router-dom";
 
-import {
-    createBrowserRouter,
-    createRoutesFromElements,
-    Route,
-} from "react-router-dom";
-import { Layout } from "./pages/Layout";
+import { Navbar } from "./components/Navbar";
+import { Footer } from "./components/Footer";
+
 import { Home } from "./pages/Home";
+import { Login } from "./pages/Login";
+import { Register } from "./pages/Register";
+import { Profile } from "./pages/Profile";
+import { Carrito } from "./pages/Carrito";
 import { Single } from "./pages/Single";
-import { Demo } from "./pages/Demo";
+import { Ordenadores } from "./pages/Ordenadores";
+import { Mobilidad } from "./pages/Mobilidad";
+import { Accesorios } from "./pages/Accesorios";
+import { Tablets } from "./pages/Tablets";
+import { Consolas } from "./pages/Consolas";
+import { Apple } from "./pages/Apple";
+import { Electrodomesticos } from "./pages/Electrodomesticos";
+import { Telefonos } from "./pages/Telefonos";
+import { Otros } from "./pages/Otros";
+import { Perifericos } from "./pages/Perifiericos";
 
-export const router = createBrowserRouter(
-    createRoutesFromElements(
-    // CreateRoutesFromElements function allows you to build route elements declaratively.
-    // Create your routes here, if you want to keep the Navbar and Footer in all views, add your new routes inside the containing Route.
-    // Root, on the contrary, create a sister Route, if you have doubts, try it!
-    // Note: keep in mind that errorElement will be the default page when you don't get a route, customize that page to make your project more attractive.
-    // Note: The child paths of the Layout element replace the Outlet component with the elements contained in the "element" attribute of these child paths.
+const AppRoutes = () => {
+    return (
+        <>
+            <Navbar />
+            <Routes>
+                <Route element={<Home />} path="/" />
+                <Route element={<Login />} path="/login" />
+                <Route element={<Register />} path="/register" />
+                <Route element={<Profile />} path="/profile" />
+                <Route element={<Carrito />} path="/carrito" />
+                <Route element={<Single />} path="/single/:theid" />
+                <Route element={<Ordenadores />} path="/ordenadores" />
+                <Route element={<Mobilidad />} path="/mobilidad" />
+                <Route element={<Accesorios />} path="/accesorios" />
+                <Route element={<Tablets />} path="/tablets" />
+                <Route element={<Consolas />} path="/consolas" />
+                <Route element={<Apple />} path="/apple" />
+                <Route element={<Electrodomesticos />} path="/electrodomesticos" />
+                <Route element={<Telefonos />} path="/telefonos" />
+                <Route element={<Otros />} path="/otros" />
+                <Route element={<Perifericos />} path="/perifericos" />
+                <Route element={<h1>Not found!</h1>} path="*" />
+            </Routes>
+            <Footer />
+        </>
+    );
+};
 
-      // Root Route: All navigation will start from here.
-      <Route path="/" element={<Layout />} errorElement={<h1>Not found!</h1>} >
-
-        {/* Nested Routes: Defines sub-routes within the BaseHome component. */}
-        <Route path= "/" element={<Home />} />
-        <Route path="/single/:theId" element={ <Single />} />  {/* Dynamic route for single items */}
-        <Route path="/demo" element={<Demo />} />
-      </Route>
-    )
-);
+export default AppRoutes;

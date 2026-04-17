@@ -1,37 +1,97 @@
-// Import necessary hooks and components from react-router-dom and other libraries.
-import { Link, useParams } from "react-router-dom";  // To use link for navigation and useParams to get URL parameters
-import PropTypes from "prop-types";  // To define prop types for this component
-import rigoImageUrl from "../assets/img/rigo-baby.jpg"  // Import an image asset
-import useGlobalReducer from "../hooks/useGlobalReducer";  // Import a custom hook for accessing the global state
+import React, { useContext, useEffect, useState } from "react";
+import { useParams, Link } from "react-router-dom";
+import { Context } from "../store";
 
-// Define and export the Single component which displays individual item details.
-export const Single = props => {
-  // Access the global state using the custom hook.
-  const { store } = useGlobalReducer()
+export const Single = () => {
+    const { store, dispatch } = useContext(Context);
+    const { theid } = useParams();
+    const [product, setProduct] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-  // Retrieve the 'theId' URL parameter using useParams hook.
-  const { theId } = useParams()
-  const singleTodo = store.todos.find(todo => todo.id === parseInt(theId));
+    useEffect(() => {
+        const fetchProduct = async () => {
+            const numericId = Number(theid);
+            if (!Number.isInteger(numericId)) {
+                const fallback = store.products.find(item => item.id === theid);
+                if (fallback) {
+                    setProduct(fallback);
+                    setLoading(false);
+                    return;
+                }
+                setError("Producto no encontrado");
+                setLoading(false);
+                return;
+            }
 
-  return (
-    <div className="container text-center">
-      {/* Display the title of the todo element dynamically retrieved from the store using theId. */}
-      <h1 className="display-4">Todo: {singleTodo?.title}</h1>
-      <hr className="my-4" />  {/* A horizontal rule for visual separation. */}
+            try {
+                const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.BACKEND_URL;
+                const response = await fetch(`${backendUrl}/api/products/${numericId}`);
+                if (!response.ok) throw new Error("No se encontró el producto");
+                const data = await response.json();
+                setProduct(data);
+            } catch (err) {
+                const fallback = store.products.find(item => item.id === theid || item.id === numericId);
+                if (fallback) {
+                    setProduct(fallback);
+                } else {
+                    setError("Producto no encontrado");
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
 
-      {/* A Link component acts as an anchor tag but is used for client-side routing to prevent page reloads. */}
-      <Link to="/">
-        <span className="btn btn-primary btn-lg" href="#" role="button">
-          Back home
-        </span>
-      </Link>
-    </div>
-  );
-};
+        fetchProduct();
+    }, [theid, store.products]);
 
-// Use PropTypes to validate the props passed to this component, ensuring reliable behavior.
-Single.propTypes = {
-  // Although 'match' prop is defined here, it is not used in the component.
-  // Consider removing or using it as needed.
-  match: PropTypes.object
+    const handleAddToCart = () => {
+        if (!product) return;
+        dispatch({
+            type: "add_to_cart",
+            payload: {
+                product_id: product.id,
+                title: product.title,
+                price: product.price,
+                thumbnail: product.thumbnail,
+            },
+        });
+    };
+
+    if (loading) {
+        return (
+            <div className="container-fluid py-5 text-center">
+                <div className="spinner-border text-dark"></div>
+            </div>
+        );
+    }
+
+    if (error || !product) {
+        return (
+            <div className="container-fluid py-5 text-center">
+                <h3>{error || "Producto no encontrado"}</h3>
+                <Link to="/" className="btn btn-dark rounded-pill mt-4">Volver al inicio</Link>
+            </div>
+        );
+    }
+
+    return (
+        <div className="container-fluid py-5" style={{ backgroundColor: "#CFD6EA", minHeight: "100vh" }}>
+            <div className="container bg-white p-5 rounded-4 shadow-sm">
+                <div className="row">
+                    <div className="col-md-6 text-center mb-4 mb-md-0">
+                        <img src={product.thumbnail} alt={product.title} className="img-fluid" style={{ maxHeight: "400px" }} />
+                    </div>
+                    <div className="col-md-6">
+                        <h2 className="fw-bold text-uppercase mb-3" style={{ color: "#423629" }}>{product.title}</h2>
+                        <p className="lead mb-4">{product.description || "Aquí encontrarás la información principal del producto."}</p>
+                        <h3 className="fw-bold mb-4">{product.price.toLocaleString("es-ES")} €</h3>
+                        <button className="btn btn-dark btn-lg rounded-pill px-5 fw-bold mb-4" onClick={handleAddToCart}>AÑADIR AL CARRITO</button>
+                        <br />
+                        <Link to="/" className="text-dark fw-bold text-uppercase" style={{ fontSize: "0.8rem" }}>Volver al inicio</Link>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 };

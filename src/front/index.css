@@ -1,0 +1,14 @@
+:root {
+    --taupe-dark: #423629;
+    --olive-leaf: #4F5D2F;
+    --grey-olive: #7D7E75;
+    --pale-slate: #B0B2B8;
+    --lavender-tech: #CFD6EA; 
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    /* Volvemos al fondo azulado */
+    background-color: var(--lavender-tech) !important;
+}
